@@ -1,0 +1,14 @@
+{
+  "name": "fpm-api",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": { "start": "node src/index.js" },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "dockerode": "^4.0.2",
+    "fastify": "^4.28.1",
+    "nanoid": "^5.0.7",
+    "pg": "^8.12.0"
+  }
+}
