@@ -1,5 +1,6 @@
 "use client";
-import { Bell, Search, User } from "lucide-react";
+
+import { Bell, Search } from "lucide-react";
 
 export function Topbar({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: React.ReactNode }) {
   return (
@@ -18,15 +19,6 @@ export function Topbar({ title, subtitle, actions }: { title: string; subtitle?:
           <Bell className="w-4 h-4 text-slate-300" />
           <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500" />
         </button>
-        <div className="flex items-center gap-2 pl-3 border-l border-[var(--border)]">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 grid place-items-center">
-            <User className="w-4 h-4 text-white" />
-          </div>
-          <div className="hidden md:block text-xs">
-            <div className="font-medium">Admin</div>
-            <div className="text-slate-500">admin@fpm.local</div>
-          </div>
-        </div>
         {actions}
       </div>
     </div>

@@ -5,17 +5,45 @@ services:
       - .env
     environment:
       DOCKER_HOST: unix:///var/run/docker.sock
+      DATA_FILE: /data/function-platform.json
+      FN_WORKDIR: /workdir
+      FPM_PLATFORM_ROOT: /workspace
+      NODE_OPTIONS: --dns-result-order=ipv4first
       PUBLIC_HOST: localhost
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - .:/workspace:ro
+      - ./data:/data
+      - ./certs:/certs:ro
       - fn_workdir:/workdir
     ports:
       - "4000:4000"
 
   web:
-    build: ./web
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+        NEXT_PUBLIC_ENVIRONMENT: ${NEXT_PUBLIC_ENVIRONMENT:-dev}
+        NEXT_PUBLIC_AUTH_URL: ${AUTH_URL:-https://auth.sendcraft.net}
+        NEXT_PUBLIC_AUTH_APP_ID: ${AUTH_APP_ID:-}
+        NEXT_PUBLIC_AUTH_PUBLIC_API_KEY: ${AUTH_PUBLIC_API_KEY:-}
+        NEXT_PUBLIC_AUTH_REDIRECT_URI: ${AUTH_REDIRECT_URI_DEV:-http://localhost:3000/callback}
+    env_file:
+      - .env
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+      NEXT_PUBLIC_ENVIRONMENT: ${NEXT_PUBLIC_ENVIRONMENT:-dev}
+      AUTH_URL: ${AUTH_URL:-https://auth.sendcraft.net}
+      AUTH_APP_ID: ${AUTH_APP_ID:-}
+      AUTH_PUBLIC_API_KEY: ${AUTH_PUBLIC_API_KEY:-}
+      AUTH_REDIRECT_URI: ${AUTH_REDIRECT_URI_DEV:-http://localhost:3000/callback}
+      AUTH_VALIDATE_TOKEN: ${AUTH_VALIDATE_TOKEN:-}
+      AUTH_API_KEY: ${AUTH_API_KEY:-}
+      NEXT_PUBLIC_AUTH_URL: ${AUTH_URL:-https://auth.sendcraft.net}
+      NEXT_PUBLIC_AUTH_APP_ID: ${AUTH_APP_ID:-}
+      NEXT_PUBLIC_AUTH_PUBLIC_API_KEY: ${AUTH_PUBLIC_API_KEY:-}
+      NEXT_PUBLIC_AUTH_REDIRECT_URI: ${AUTH_REDIRECT_URI_DEV:-http://localhost:3000/callback}
     ports:
       - "3000:3000"
     depends_on:

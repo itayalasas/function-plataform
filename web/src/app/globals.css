@@ -52,6 +52,11 @@ body {
     box-shadow: 0 10px 30px -10px rgba(139,92,246,.7);
   }
   .btn-primary:hover { filter: brightness(1.1); }
+  .btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+    filter: none;
+  }
   .btn-ghost {
     @apply btn text-slate-200;
     background: rgba(255,255,255,.04);
@@ -85,6 +90,201 @@ body {
     background: linear-gradient(135deg, #c4b5fd, #67e8f9);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
+  .code-editor-shell {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: .5rem;
+    background: #090b12;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .code-editor-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 38px;
+    gap: 12px;
+    padding: 0 10px 0 0;
+    border-bottom: 1px solid rgba(45,47,85,.85);
+    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015)), #12131f;
+  }
+  .code-editor-tabs {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+    align-self: stretch;
+  }
+  .code-editor-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: min(420px, 60vw);
+    padding: 0 14px;
+    border-right: 1px solid rgba(45,47,85,.85);
+    color: #cbd5e1;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 12px;
+  }
+  .code-editor-tab.is-active {
+    background: #090b12;
+    color: #fff;
+    box-shadow: inset 0 -2px 0 rgba(139,92,246,.95);
+  }
+  .code-editor-file-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #22d3ee;
+    box-shadow: 0 0 12px rgba(34,211,238,.55);
+    flex: 0 0 auto;
+  }
+  .code-editor-meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 0;
+    color: #8b93ad;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .code-editor {
+    display: grid;
+    grid-template-columns: 60px minmax(0, 1fr);
+    height: min(700px, calc(100vh - 240px));
+    min-height: 480px;
+    overflow: hidden;
+    background: #090b12;
+  }
+  .code-gutter {
+    overflow: hidden;
+    border-right: 1px solid rgba(45,47,85,.7);
+    background: #0f111a;
+    color: #64748b;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 13px;
+    line-height: 24px;
+    padding-top: 16px;
+    text-align: right;
+  }
+  .code-gutter-inner > div {
+    height: 24px;
+    padding-right: 11px;
+  }
+  .code-gutter-inner > div.is-match {
+    color: #fcd34d;
+  }
+  .code-gutter-inner > div.is-current {
+    color: #fff;
+    background: rgba(139,92,246,.20);
+    box-shadow: inset 2px 0 0 rgba(139,92,246,.85);
+  }
+  .code-gutter-inner > div.is-active-line {
+    color: #cbd5e1;
+    background: rgba(255,255,255,.035);
+  }
+  .code-pane {
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .code-highlight,
+  .code-input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    border: 0;
+    outline: 0;
+    padding: 16px 40px 18px 18px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 13px;
+    line-height: 24px;
+    tab-size: 2;
+    white-space: pre;
+    letter-spacing: 0;
+    font-variant-ligatures: none;
+    text-rendering: optimizeLegibility;
+  }
+  .code-measure {
+    position: absolute;
+    top: 0;
+    left: 0;
+    visibility: hidden;
+    pointer-events: none;
+    white-space: pre;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 13px;
+    line-height: 24px;
+    letter-spacing: 0;
+    font-variant-ligatures: none;
+  }
+  .code-highlight {
+    pointer-events: none;
+    min-width: max-content;
+    color: #e5e7eb;
+    background:
+      linear-gradient(90deg, rgba(139,92,246,.04), transparent 26px),
+      #090b12;
+    z-index: 1;
+  }
+  .code-input {
+    resize: none;
+    overflow: auto;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    caret-color: transparent;
+    background: transparent;
+    scrollbar-gutter: stable;
+    z-index: 2;
+  }
+  .code-input:focus {
+    box-shadow: inset 0 0 0 1px rgba(139,92,246,.45);
+  }
+  .code-input::selection {
+    background: rgba(139,92,246,.35);
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+  .code-line {
+    min-height: 24px;
+    padding: 0 4px;
+    border-radius: 4px;
+  }
+  .code-line.is-match {
+    background: rgba(245,158,11,.11);
+    box-shadow: inset 2px 0 0 rgba(245,158,11,.65);
+  }
+  .code-line.is-active-line {
+    background: rgba(255,255,255,.035);
+  }
+  .code-line.is-current {
+    background: rgba(245,158,11,.18);
+    box-shadow: inset 2px 0 0 rgba(245,158,11,.9);
+  }
+  .code-caret {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #67e8f9, #22d3ee);
+    box-shadow: 0 0 0 1px rgba(8,11,18,.50), 0 0 12px rgba(34,211,238,.30);
+    animation: code-caret-blink 1.05s steps(1) infinite;
+    will-change: transform;
+  }
+  .tok-keyword { color: #60a5fa; }
+  .tok-string { color: #fca5a5; }
+  .tok-number { color: #c4b5fd; }
+  .tok-comment { color: #6b7280; font-style: italic; }
+  .tok-builtin { color: #2dd4bf; }
+  .tok-env { color: #34d399; }
+  .tok-function { color: #fde68a; }
+  .tok-punctuation { color: #a5b4fc; }
+  .tok-search {
+    background: rgba(250,204,21,.35);
+    color: #fef3c7;
+    border-radius: 3px;
+  }
   .nav-item {
     @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition;
     color: var(--text-2);
@@ -95,6 +295,11 @@ body {
     color: #fff;
     border: 1px solid rgba(139,92,246,.35);
   }
+}
+
+@keyframes code-caret-blink {
+  0%, 48% { opacity: 1; }
+  49%, 100% { opacity: 0; }
 }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }

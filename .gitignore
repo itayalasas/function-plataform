@@ -1,0 +1,12 @@
+.env
+node_modules/
+api/node_modules/
+web/node_modules/
+.next/
+web/.next/
+.npm-cache/
+api/.npm-cache/
+web/.npm-cache/
+data/
+api/data/
+*.log

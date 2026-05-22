@@ -1,37 +1,68 @@
 "use client";
-import { Topbar } from "@/components/Topbar";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Mail, FileText, CreditCard, Webhook, Database, Image as ImageIcon } from "lucide-react";
+import { Topbar } from "@/components/Topbar";
+import { api } from "@/lib/api";
+import { Code2, Database, FileJson, KeyRound, Webhook } from "lucide-react";
 
-const TPL = [
-  { name: "Send Email", desc: "Envía emails con Resend o SMTP", icon: Mail, color: "#7c5cff", code: `export default async function handler(req){ return new Response("send-email"); }` },
-  { name: "Create Invoice", desc: "Genera facturas en PDF", icon: FileText, color: "#22d3ee", code: `export default async function handler(req){ return new Response("invoice"); }` },
-  { name: "Process Payment", desc: "Procesa pagos con Stripe", icon: CreditCard, color: "#22c55e", code: `export default async function handler(req){ return new Response("pay"); }` },
-  { name: "Webhook Handler", desc: "Recibe webhooks de terceros", icon: Webhook, color: "#f59e0b", code: `export default async function handler(req){ return new Response("ok"); }` },
-  { name: "Data Processor", desc: "ETL ligero JSON/CSV", icon: Database, color: "#ec4899", code: `export default async function handler(req){ return new Response("data"); }` },
-  { name: "Image Resizer", desc: "Redimensiona imágenes", icon: ImageIcon, color: "#06b6d4", code: `export default async function handler(req){ return new Response("img"); }` },
-];
+type Template = {
+  id: string;
+  name: string;
+  slug: string;
+  category?: string;
+  runtime: string;
+  description?: string;
+  code: string;
+  files?: { path: string; content: string }[];
+  entrypoint?: string;
+};
+
+const iconBySlug: Record<string, any> = {
+  "http-json": FileJson,
+  "webhook-handler": Webhook,
+  "secret-check": KeyRound,
+};
 
 export default function TemplatesPage() {
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    api<Template[]>("/api/templates")
+      .then(setTemplates)
+      .catch((error) => setErr(error.message));
+  }, []);
+
   return (
     <div>
-      <Topbar title="Templates" subtitle="Comienza rápido con plantillas listas para usar" />
+      <Topbar title="Templates" subtitle="Plantillas versionadas desde el backend de la plataforma" />
+
+      {err && <div className="card mb-5 text-rose-300 text-sm">No se pudieron cargar templates: {err}</div>}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {TPL.map(t => {
-          const Icon = t.icon;
+        {templates.map((template) => {
+          const Icon = iconBySlug[template.slug] || (template.category === "data" ? Database : Code2);
           return (
-            <Link key={t.name} href={{ pathname: "/new", query: { template: t.name, code: t.code } }}
-              className="card hover:border-violet-500/40 transition group">
-              <div className="w-12 h-12 rounded-xl grid place-items-center mb-4" style={{ background: `${t.color}22`, color: t.color }}>
+            <Link
+              key={template.id}
+              href={{ pathname: "/new", query: { template_id: template.id } }}
+              className="card hover:border-violet-500/40 transition group"
+            >
+              <div className="w-12 h-12 rounded-xl grid place-items-center mb-4 bg-violet-500/15 text-violet-300">
                 <Icon className="w-6 h-6" />
               </div>
-              <div className="font-semibold mb-1">{t.name}</div>
-              <div className="text-xs text-slate-400 mb-3">{t.desc}</div>
-              <div className="text-xs text-violet-300 group-hover:underline">Usar plantilla →</div>
+              <div className="flex items-center justify-between gap-3">
+                <div className="font-semibold">{template.name}</div>
+                <span className="chip" style={{ borderColor: "var(--border-2)", color: "var(--text-2)" }}>{template.runtime}</span>
+              </div>
+              <div className="text-xs text-slate-400 mt-2 mb-3">{template.description}</div>
+              <div className="text-xs text-violet-300 group-hover:underline">Usar plantilla</div>
             </Link>
           );
         })}
       </div>
+
+      {!err && templates.length === 0 && <div className="card text-center text-slate-500 py-12">Cargando templates...</div>}
     </div>
   );
 }
