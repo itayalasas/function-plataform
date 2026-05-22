@@ -2,15 +2,15 @@ import { headers } from "next/headers";
 import { LoginPanel } from "@/components/LoginPanel";
 import { buildExternalAuthUrl, resolveExternalAuthConfig } from "@/lib/auth";
 
-function getOrigin() {
-  const headerList = headers();
+async function getOrigin() {
+  const headerList = await headers();
   const host = headerList.get("x-forwarded-host") || headerList.get("host") || "localhost:3000";
   const proto = headerList.get("x-forwarded-proto") || (host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https");
   return `${proto}://${host}`;
 }
 
-export default function LoginPage() {
-  const config = resolveExternalAuthConfig(getOrigin());
+export default async function LoginPage() {
+  const config = resolveExternalAuthConfig(await getOrigin());
   const loginUrl = buildExternalAuthUrl("login", config);
   const registerUrl = buildExternalAuthUrl("register-tenant", config);
 
