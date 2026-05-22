@@ -2,6 +2,8 @@ import { headers } from "next/headers";
 import { LoginPanel } from "@/components/LoginPanel";
 import { buildExternalAuthUrl, resolveExternalAuthConfig } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 async function getOrigin() {
   const headerList = await headers();
   const host = headerList.get("x-forwarded-host") || headerList.get("host") || "localhost:3000";
