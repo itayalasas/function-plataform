@@ -69,6 +69,13 @@ export function AuthCallbackClient({ appId }: Props) {
         }
 
         storeAuthSession(session);
+        console.info("[auth callback]", {
+          tenantId: session.tenant?.id || null,
+          tenantName: session.tenant?.name || null,
+          userId: session.user?.id || null,
+          userEmail: session.user?.email || null,
+          applicationId: session.application?.id || null,
+        });
 
         if (!cancelled) {
           setView({

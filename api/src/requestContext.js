@@ -31,9 +31,12 @@ function tenantIdFromAuthorization(authorization = "") {
 }
 
 export function setRequestContext(context = {}) {
-  const tenantFromAuth = context.tenantId || tenantIdFromAuthorization(context.authorization);
+  const tenantFromHeader = String(context.tenantId || "").trim();
+  const tenantFromAuth = tenantFromHeader ? null : tenantIdFromAuthorization(context.authorization);
+  const tenantSource = tenantFromHeader ? "header" : tenantFromAuth ? "authorization" : "default";
   requestContext.enterWith({
-    tenantId: String(tenantFromAuth || "").trim() || null,
+    tenantId: String(tenantFromHeader || tenantFromAuth || "").trim() || null,
+    tenantSource,
     userId: String(context.userId || "").trim() || null,
     applicationId: String(context.applicationId || "").trim() || null,
   });
@@ -46,4 +49,9 @@ export function getRequestContext() {
 export function getRequestTenantId() {
   const ctx = getRequestContext();
   return String(ctx.tenantId || process.env.DEFAULT_TENANT_ID || process.env.FPM_DEFAULT_TENANT_ID || "").trim() || null;
+}
+
+export function getRequestTenantSource() {
+  const ctx = getRequestContext();
+  return String(ctx.tenantSource || (ctx.tenantId ? "explicit" : "default") || "").trim() || "default";
 }

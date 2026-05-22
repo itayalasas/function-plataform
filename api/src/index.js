@@ -48,7 +48,7 @@ import {
   ensureLegacyTenantBackfill,
   q,
 } from "./db.js";
-import { getRequestTenantId, setRequestContext } from "./requestContext.js";
+import { getRequestTenantId, getRequestTenantSource, setRequestContext } from "./requestContext.js";
 import { buildAndDeploy, getDockerStatus, readContainerLogHistory, stopAndRemove, streamLogs } from "./docker.js";
 import {
   azureContainerAppShardNamesForTarget,
@@ -71,12 +71,26 @@ const app = Fastify({ logger: true });
 await app.register(cors, { origin: true });
 
 app.addHook("onRequest", async (req) => {
+  const tenantHeader = req.headers["x-tenant-id"] || req.headers["x-tenantid"] || req.headers["x-tenant"] || null;
   setRequestContext({
-    tenantId: req.headers["x-tenant-id"] || req.headers["x-tenantid"] || req.headers["x-tenant"] || null,
+    tenantId: tenantHeader,
     authorization: req.headers.authorization || null,
     userId: req.headers["x-user-id"] || null,
     applicationId: req.headers["x-application-id"] || null,
   });
+  const resolvedTenantId = getRequestTenantId();
+  const tenantSource = getRequestTenantSource();
+  req.log.info({
+    request_id: req.id,
+    method: req.method,
+    url: req.url,
+    tenant_header: tenantHeader ? String(tenantHeader).trim() : null,
+    tenant_id: resolvedTenantId,
+    tenant_source: tenantSource,
+    user_id: req.headers["x-user-id"] || null,
+    application_id: req.headers["x-application-id"] || null,
+    has_authorization: Boolean(req.headers.authorization),
+  }, "tenant context resolved");
 });
 
 app.addHook("preHandler", async () => {

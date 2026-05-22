@@ -58,6 +58,71 @@ function readEnv(...keys: string[]) {
   return "";
 }
 
+function decodeBase64Url(input: string) {
+  const normalized = String(input || "").replace(/-/g, "+").replace(/_/g, "/");
+  const padded = normalized + "=".repeat((4 - (normalized.length % 4 || 4)) % 4);
+  if (typeof atob === "function") {
+    return atob(padded);
+  }
+  if (typeof Buffer !== "undefined") {
+    return Buffer.from(padded, "base64").toString("utf8");
+  }
+  throw new Error("No hay decodificador base64 disponible");
+}
+
+type JwtPayload = Record<string, any>;
+
+function decodeJwtPayload(token?: string | null): JwtPayload | null {
+  const raw = String(token || "").trim();
+  if (!raw) return null;
+  const parts = raw.split(".");
+  if (parts.length < 2) return null;
+  try {
+    return JSON.parse(decodeBase64Url(parts[1]));
+  } catch {
+    return null;
+  }
+}
+
+function normalizeTenantFromPayload(tenantLike: any): AuthTenant | null {
+  if (!tenantLike || typeof tenantLike !== "object") return null;
+  const id = String(
+    tenantLike.id ||
+    tenantLike.tenant_id ||
+    tenantLike.tenantId ||
+    tenantLike.tid ||
+    ""
+  ).trim();
+  if (!id) return null;
+  return {
+    id,
+    name: String(tenantLike.name || tenantLike.organization_name || tenantLike.organizationName || id).trim() || id,
+    owner_user_id: tenantLike.owner_user_id || tenantLike.ownerUserId || undefined,
+    owner_email: tenantLike.owner_email || tenantLike.ownerEmail || undefined,
+    organization_name: tenantLike.organization_name || tenantLike.organizationName || undefined,
+    status: tenantLike.status || undefined,
+  };
+}
+
+function tenantFromJwt(token?: string | null): AuthTenant | null {
+  const payload = decodeJwtPayload(token);
+  if (!payload) return null;
+  const embedded = normalizeTenantFromPayload(payload.tenant);
+  if (embedded) return embedded;
+
+  const id = String(payload.tenant_id || payload.tenantId || payload.tid || "").trim();
+  if (!id) return null;
+
+  return {
+    id,
+    name: String(payload.tenant_name || payload.tenantName || payload.organization_name || payload.organizationName || id).trim() || id,
+    owner_user_id: payload.owner_user_id || payload.ownerUserId || undefined,
+    owner_email: payload.owner_email || payload.ownerEmail || undefined,
+    organization_name: payload.organization_name || payload.organizationName || undefined,
+    status: payload.tenant_status || payload.status || undefined,
+  };
+}
+
 function isLocalHostUrl(value: string) {
   return /(^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?(\/|$))|(^https?:\/\/[^/]+\.local(\/|$))/i.test(String(value || "").trim());
 }
@@ -102,8 +167,13 @@ export function normalizeAuthSession(input: AuthExchangeResponse | null | undefi
   if (!input) return null;
   const session = ("data" in input ? input.data : input) as AuthSession | undefined;
   if (!session?.access_token) return null;
+  const payload = decodeJwtPayload(session.access_token);
+  const payloadTenant = tenantFromJwt(session.access_token);
+  const payloadApplication = payload?.app_id || payload?.application_id;
   return {
     ...session,
+    tenant: session.tenant || payloadTenant || undefined,
+    application: session.application || (payloadApplication ? { id: String(payloadApplication) } : undefined),
     received_at: session.received_at || new Date().toISOString(),
   };
 }
