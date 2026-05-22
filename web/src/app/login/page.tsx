@@ -1,21 +1,6 @@
-import { headers } from "next/headers";
 import { LoginPanel } from "@/components/LoginPanel";
-import { buildExternalAuthUrl, resolveExternalAuthConfig } from "@/lib/auth";
 
-export const dynamic = "force-dynamic";
-
-async function getOrigin() {
-  const headerList = await headers();
-  const host = headerList.get("x-forwarded-host") || headerList.get("host") || "localhost:3000";
-  const proto = headerList.get("x-forwarded-proto") || (host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https");
-  return `${proto}://${host}`;
-}
-
-export default async function LoginPage() {
-  const config = resolveExternalAuthConfig(await getOrigin());
-  const loginUrl = buildExternalAuthUrl("login", config);
-  const registerUrl = buildExternalAuthUrl("register-tenant", config);
-
+export default function LoginPage() {
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Background */}
@@ -28,7 +13,7 @@ export default async function LoginPage() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-8">
         <main>
-          <LoginPanel loginUrl={loginUrl} registerUrl={registerUrl} />
+          <LoginPanel />
         </main>
       </div>
     </div>

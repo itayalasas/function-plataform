@@ -2,13 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CircleCheck as CheckCircle2, KeyRound, ShieldCheck, Zap, Building2, Users } from "lucide-react";
+import { ArrowRight, CircleCheck as CheckCircle2, ShieldCheck, Zap, Building2, Users } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
-
-type LoginPanelProps = {
-  loginUrl: string;
-  registerUrl: string;
-};
+import { buildExternalAuthUrl, resolveExternalAuthConfig } from "@/lib/auth";
 
 function Benefit({ icon: Icon, title, text }: { icon: any; title: string; text: string }) {
   return (
@@ -24,11 +20,16 @@ function Benefit({ icon: Icon, title, text }: { icon: any; title: string; text: 
   );
 }
 
-export function LoginPanel({ loginUrl, registerUrl }: LoginPanelProps) {
+export function LoginPanel() {
   const router = useRouter();
   const { ready, isAuthenticated, session } = useAuth();
 
   const accessLabel = session?.tenant?.name || session?.user?.name || "Tu cuenta";
+
+  const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+  const config = resolveExternalAuthConfig(origin);
+  const loginUrl = buildExternalAuthUrl("login", config);
+  const registerUrl = buildExternalAuthUrl("register-tenant", config);
 
   return (
     <div className="flex min-h-[calc(100vh-120px)] items-center">
